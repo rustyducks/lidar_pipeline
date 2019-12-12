@@ -9,7 +9,7 @@ pub struct Cluster<'a>{
     pub closest_point: PolarPoint
 }
 
-impl Cluster<'_>{
+impl <'a>Cluster<'a>{
     pub fn new(sample: &Sample) -> Cluster{
         Cluster{
             barycenter: PolarPoint::new(sample.distance as f64, sample.angle),
@@ -19,7 +19,7 @@ impl Cluster<'_>{
         }
     }
 
-    pub fn push(&mut self, sample: &Sample){
+    pub fn push(&mut self, sample: &'a Sample){
         if (sample.distance as f64) < self.closest_point.distance{
             self.closest_point = PolarPoint{distance: sample.distance as f64, angle: sample.angle};
         }
