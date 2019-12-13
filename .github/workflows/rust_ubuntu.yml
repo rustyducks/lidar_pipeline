@@ -1,4 +1,4 @@
-name: Rust Ubuntu
+name: Rust Ubuntu Build and Tests
 
 on: [push]
 

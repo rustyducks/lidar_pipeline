@@ -1,4 +1,4 @@
-name: Rust Ubuntu
+name: Rust ARM Cross Compiling
 
 on: [push]
 
