@@ -1,4 +1,4 @@
-use crate::geometrical_tools::PolarPoint;
+use crate::geometrical_tools::{PolarPoint, wrap_angle};
 use std::vec::Vec;
 use lidar_rd::Sample;
 
@@ -26,6 +26,9 @@ impl <'a>Cluster<'a>{
         if sample.quality > self.max_intensity {
             self.max_intensity = sample.quality;
         }
+
+        self.barycenter = PolarPoint::new((self.barycenter.distance * self.size() as f64 + sample.distance as f64) / ((self.size() + 1) as f64),
+                                            wrap_angle((self.barycenter.angle * self.size() as f64 + sample.angle) / ((self.size() + 1)) as f64));
 
         self.points.push(sample);
     }
