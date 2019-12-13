@@ -1,3 +1,5 @@
+use std::f64::consts::PI;
+
 pub struct PolarPoint{
     pub angle: f64,
     pub distance: f64
@@ -7,7 +9,7 @@ impl PolarPoint{
     pub fn new(distance: f64, angle: f64) -> PolarPoint{
         PolarPoint{
             distance,
-            angle
+            angle: wrap_angle(angle)
         }
     }
 }
@@ -24,4 +26,18 @@ impl CartesianPoint{
             y
         }
     }
+}
+
+pub fn wrap_angle(angle: f64) -> f64{
+    let mut a = angle;
+    while a < -PI {
+        a += 2.0 * PI;
+    }
+
+    while a >= PI {
+        a -= 2.0 * PI;
+    }
+
+    return a;
+}
 }
