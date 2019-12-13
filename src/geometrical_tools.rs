@@ -57,6 +57,13 @@ mod test{
     }
 
     #[test]
+    fn test_new_cartesian_point(){
+        let cp = CartesianPoint::new(34.63, 23.76);
+        assert_eq!(cp.x, 34.63);
+        assert_eq!(cp.y, 23.76);
+    }
+
+    #[test]
     fn test_wrap_angle(){
         assert_eq!(wrap_angle(1.23), 1.23);
         assert_eq!(wrap_angle(6.0 * PI), 0.0);
