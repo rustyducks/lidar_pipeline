@@ -39,3 +39,48 @@ impl <'a>Cluster<'a>{
 
 }
 
+#[cfg(test)]
+mod tests{
+    use super::*;
+
+    #[test]
+    fn test_cluster_creation(){
+        let s = Sample{angle: 2.54, distance: 135, quality: 34};
+        let c = Cluster::new(&s);
+        assert_eq!(c.barycenter.distance, 135.0);
+        assert_eq!(c.barycenter.angle, 2.54);
+        assert_eq!(c.points.len(), 1);
+        assert_eq!(c.points[0].angle, 2.54);
+        assert_eq!(c.points[0].distance, 135);
+        assert_eq!(c.points[0].quality, 34);
+        assert_eq!(c.max_intensity, 34);
+        assert_eq!(c.closest_point.angle, 2.54);
+        assert_eq!(c.closest_point.distance, 135.0);
+
+        assert_eq!(c.size(), 1);
+    }
+
+    #[test]
+    fn test_cluster_add(){
+        let s1 = Sample{angle: 1.0, distance: 200, quality:54};
+        let s2 = Sample{angle: 2.0, distance: 100, quality: 65};
+        let s3 = Sample{angle: 3.0, distance: 300, quality: 243};
+        let s4 = Sample{angle: 4.0, distance: 400, quality: 145};
+        let mut c = Cluster::new(&s1);
+        c.push(&s2);
+        c.push(&s3);
+        c.push(&s4);
+        assert_eq!(c.barycenter.distance, 250.0);
+        assert_eq!(c.barycenter.angle, 2.5);
+        assert_eq!(c.points.len(), 4);
+        assert_eq!(c.points[0].angle, 1.0);
+        assert_eq!(c.points[0].distance, 200);
+        assert_eq!(c.points[0].quality, 54);
+        assert_eq!(c.max_intensity, 243);
+        assert_eq!(c.closest_point.angle, 2.0);
+        assert_eq!(c.closest_point.distance, 100.0);
+
+        assert_eq!(c.size(), 4);
+    }
+}
+
