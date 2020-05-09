@@ -1,5 +1,6 @@
 use std::f64::consts::PI;
 
+#[derive(Debug, Copy, Clone)]
 pub struct PolarPoint{
     pub angle: f64,
     pub distance: f64
@@ -11,6 +12,12 @@ impl PolarPoint{
             distance,
             angle: wrap_angle(angle)
         }
+    }
+}
+
+impl std::fmt::Display for PolarPoint {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "({}, {}°)", self.distance, self.angle * 180. / PI)
     }
 }
 

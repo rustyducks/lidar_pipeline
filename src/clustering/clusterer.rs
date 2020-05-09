@@ -2,24 +2,32 @@ use crate::geometrical_tools::{PolarPoint, wrap_angle};
 use std::vec::Vec;
 use lidar_rd::Sample;
 
-pub struct Cluster<'a>{
+#[derive(Debug)]
+pub struct Cluster{
     pub barycenter: PolarPoint,
-    pub points: Vec<&'a Sample>,
+    pub points: Vec<Sample>,
     pub max_intensity: u16,
     pub closest_point: PolarPoint
 }
 
-impl <'a>Cluster<'a>{
+impl std::fmt::Display for Cluster {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "Cluster: barycenter: {}; {} points; max_intensity: {}; closest point: {}", self.barycenter, self.points.len(), self.max_intensity, self.closest_point)
+    }
+}
+
+impl Cluster{
     pub fn new(sample: &Sample) -> Cluster{
+        let s = *sample;  // Copy
         Cluster{
-            barycenter: PolarPoint::new(sample.distance as f64, sample.angle),
-            points: vec![&sample],
+            barycenter: PolarPoint::new(s.distance as f64, s.angle),
+            points: vec![s],
             max_intensity: sample.quality,
-            closest_point: PolarPoint::new(sample.distance as f64, sample.angle)
+            closest_point: PolarPoint::new(s.distance as f64, s.angle)
         }
     }
 
-    pub fn push(&mut self, sample: &'a Sample){
+    pub fn push(&mut self, sample: &Sample){
         if (sample.distance as f64) < self.closest_point.distance{
             self.closest_point = PolarPoint{distance: sample.distance as f64, angle: sample.angle};
         }
@@ -30,13 +38,17 @@ impl <'a>Cluster<'a>{
         self.barycenter = PolarPoint::new((self.barycenter.distance * self.size() as f64 + sample.distance as f64) / ((self.size() + 1) as f64),
                                             wrap_angle((self.barycenter.angle * self.size() as f64 + sample.angle) / ((self.size() + 1)) as f64));
 
-        self.points.push(sample);
+        
+        self.points.push(*sample);  // Copy
     }
 
     pub fn size(&self) -> usize{
         self.points.len()
     }
+}
 
+pub trait Clusterer{
+    fn cluster(self, samples: Option<Vec<Option<Sample>>>) -> Option<Vec<Cluster>>;
 }
 
 #[cfg(test)]
