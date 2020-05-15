@@ -1,0 +1,25 @@
+mask:
+  table: # Outside this rectangle, any lidar point will be discarded
+    x_start: 100.
+    y_start: 100.
+    x_stop: 2900.
+    y_stop: 1900.
+  static_obstacles: # Inside those rectangles, any lidar point will be discarded
+    - rect:
+        x1: 100.
+        y1: 2000.
+        x2: 200.
+        y2: 2300.
+    - rect:
+        x1: 1200.
+        y1: 0.
+        x2: 1350.
+        y2: 1235.
+    - circle:
+        center:
+          x: 1000.
+          y: 950.
+        radius: 150.
+
+
+

@@ -35,6 +35,12 @@ impl CartesianPoint{
     }
 }
 
+impl std::fmt::Display for CartesianPoint {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
+}
+
 pub fn wrap_angle(angle: f64) -> f64{
     let mut a = angle;
     while a < -PI {

@@ -1,9 +1,11 @@
 mod clustering;
 mod geometrical_tools;
+mod obstacles;
 
 pub use crate::clustering::clusterer;
 pub use crate::clustering::clusterer::Clusterer;
 pub use crate::clustering::proximity_clusterer;
+pub use crate::obstacles::mask_from_file;
 pub use lidar_rd::Sample;
 
 fn main() {
@@ -19,5 +21,15 @@ fn main() {
     for cl in &clusters.unwrap(){
         println!("{}", cl);
     }
+
+    let mask = mask_from_file("obstacles_lidar_mask.yaml");
+
+    println!("Mask:");
+    println!("\tTable: {}", mask.table);
+    println!("\tObstacles:");
+    for o in mask.static_obstacles{
+        println!("\t\t{}", o);
+    }
+
 
 }
