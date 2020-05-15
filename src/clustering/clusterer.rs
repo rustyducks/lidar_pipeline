@@ -2,7 +2,7 @@ use crate::geometrical_tools::{PolarPoint, wrap_angle};
 use std::vec::Vec;
 use lidar_rd::Sample;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Cluster{
     pub barycenter: PolarPoint,
     pub points: Vec<Sample>,

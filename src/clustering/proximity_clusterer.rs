@@ -1,5 +1,4 @@
 use super::clusterer::{Clusterer, Cluster};
-use std::mem;
 use lidar_rd::Sample;
 
 pub struct ProximityCluster{
@@ -62,29 +61,6 @@ mod tests{
         assert_eq!(clusters[1].points.len(), 2);
         assert_eq!(clusters[1].closest_point.angle, 2.37);
         assert_eq!(clusters[1].closest_point.distance, 218.);
-    }
-
-    #[test]
-    fn test_cluster_add(){
-        let s1 = Sample{angle: 1.0, distance: 200, quality:54};
-        let s2 = Sample{angle: 2.0, distance: 100, quality: 65};
-        let s3 = Sample{angle: 3.0, distance: 300, quality: 243};
-        let s4 = Sample{angle: 4.0, distance: 400, quality: 145};
-        let mut c = Cluster::new(&s1);
-        c.push(&s2);
-        c.push(&s3);
-        c.push(&s4);
-        assert_eq!(c.barycenter.distance, 250.0);
-        assert_eq!(c.barycenter.angle, 2.5);
-        assert_eq!(c.points.len(), 4);
-        assert_eq!(c.points[0].angle, 1.0);
-        assert_eq!(c.points[0].distance, 200);
-        assert_eq!(c.points[0].quality, 54);
-        assert_eq!(c.max_intensity, 243);
-        assert_eq!(c.closest_point.angle, 2.0);
-        assert_eq!(c.closest_point.distance, 100.0);
-
-        assert_eq!(c.size(), 4);
     }
 }
 
