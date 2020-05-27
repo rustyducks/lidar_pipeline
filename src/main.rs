@@ -19,10 +19,11 @@ fn main() {
     let v = vec!(s1, s2, s3, s4, s5);
     let ov = Some(v);
     let pc = proximity_clusterer::ProximityCluster{maximal_distance: 50.0};
-    let clusters = pc.cluster(ov);
+    let clusters = pc.cluster(&ov);
     for cl in &clusters.unwrap(){
         println!("{}", cl);
     }
+    let clusters = pc.cluster(&ov);
 
     let mask = mask_from_file("obstacles_lidar_mask.yaml");
 

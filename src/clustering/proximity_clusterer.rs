@@ -6,12 +6,12 @@ pub struct ProximityCluster{
 }
 
 impl Clusterer for ProximityCluster{
-    fn cluster(self, samples: Option<Vec<Option<Sample>>>) -> Option<Vec<Cluster>>{
+    fn cluster(&self, samples: &Option<Vec<Option<Sample>>>) -> Option<Vec<Cluster>>{
         let mut last_point: Option<Sample> = Option::None;
         if samples.is_none() {
             return None;
         }
-        let samples_ = samples.unwrap();
+        let samples_ = samples.as_ref().unwrap();
         let mut clusters = Vec::new();
         for sample in samples_.iter() {
             if sample.is_none() {
@@ -46,7 +46,7 @@ mod tests{
         let v = vec!(s1, s2, s3, s4, s5);
         let ov = Some(v);
         let pc = ProximityCluster{maximal_distance: 50.0};
-        let clusters = pc.cluster(ov).unwrap();
+        let clusters = pc.cluster(&ov).unwrap();
         assert_eq!(clusters.len(), 2);
         assert_eq!((2.35 - clusters[0].barycenter.angle).abs() <= 0.000001, true);
         assert_eq!(clusters[0].barycenter.distance, 341.);

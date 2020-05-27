@@ -48,7 +48,7 @@ impl Cluster{
 }
 
 pub trait Clusterer{
-    fn cluster(self, samples: Option<Vec<Option<Sample>>>) -> Option<Vec<Cluster>>;
+    fn cluster(&self, samples: &Option<Vec<Option<Sample>>>) -> Option<Vec<Cluster>>;
 }
 
 #[cfg(test)]
