@@ -1,11 +1,13 @@
 mod clustering;
 mod geometrical_tools;
 mod obstacles;
+mod redis_handler;
 
 pub use crate::clustering::clusterer;
 pub use crate::clustering::clusterer::Clusterer;
 pub use crate::clustering::proximity_clusterer;
 pub use crate::obstacles::mask_from_file;
+pub use crate::redis_handler::RobotPoseGetter;
 pub use lidar_rd::Sample;
 
 fn main() {
@@ -31,5 +33,12 @@ fn main() {
         println!("\t\t{}", o);
     }
 
+    //let mut red = redis_handler::RedisHandler::new("redis://127.0.0.1:6379").unwrap();
+    let mut red = redis_handler::FakeRedisHandler::new(geometrical_tools::Pose{x: 200.0, y: 200.0, theta: 1.57}).unwrap();
+    let p = red.get_pose();
+    match p{
+        Some(p) => println!("{}", p),
+        None => println!("Aïe Caramba")
+    }
 
 }
