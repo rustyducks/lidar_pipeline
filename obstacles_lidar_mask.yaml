@@ -7,9 +7,9 @@ mask:
   static_obstacles: # Inside those rectangles, any lidar point will be discarded
     - rect:
         x1: 100.
-        y1: 2000.
+        y1: 130.
         x2: 200.
-        y2: 2300.
+        y2: 150.
     - rect:
         x1: 1200.
         y1: 0.

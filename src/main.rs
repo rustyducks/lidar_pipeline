@@ -30,7 +30,7 @@ fn main() {
     println!("Mask:");
     println!("\tTable: {}", mask.table);
     println!("\tObstacles:");
-    for o in mask.static_obstacles{
+    for o in &mask.static_obstacles{
         println!("\t\t{}", o);
     }
 
