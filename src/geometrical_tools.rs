@@ -41,6 +41,28 @@ impl std::fmt::Display for CartesianPoint {
     }
 }
 
+pub struct Pose{
+    pub x: f64,
+    pub y: f64,
+    pub theta: f64
+}
+
+impl Pose{
+    pub fn new(x: f64, y: f64, theta: f64) -> Pose{
+        Pose{
+            x: x,
+            y: y,
+            theta: wrap_angle(theta)
+        }
+    }
+}
+
+impl std::fmt::Display for Pose {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "({}, {}, {}°)", self.x, self.y, self.theta * 180. / PI)
+    }
+}
+
 pub fn wrap_angle(angle: f64) -> f64{
     let mut a = angle;
     while a < -PI {

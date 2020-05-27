@@ -2,12 +2,15 @@ mod clustering;
 mod geometrical_tools;
 mod obstacles;
 mod redis_handler;
+mod filtering;
 
 pub use crate::clustering::clusterer;
 pub use crate::clustering::clusterer::Clusterer;
 pub use crate::clustering::proximity_clusterer;
 pub use crate::obstacles::mask_from_file;
 pub use crate::redis_handler::RobotPoseGetter;
+pub use crate::filtering::sample_filter;
+pub use crate::filtering::sample_filter::SampleFilter;
 pub use lidar_rd::Sample;
 
 fn main() {
@@ -16,7 +19,8 @@ fn main() {
     let s3 = Some(Sample{angle: 2.36, distance: 338, quality: 13});
     let s4 = Some(Sample{angle: 2.37, distance: 218, quality: 6});
     let s5 = Some(Sample{angle: 2.38, distance: 225, quality: 9});
-    let v = vec!(s1, s2, s3, s4, s5);
+    let s6: Option<Sample> = Some(Sample{angle: 1.57, distance: 100, quality: 255});
+    let v = vec!(s1, s2, s3, s4, s5, s6);
     let ov = Some(v);
     let pc = proximity_clusterer::ProximityCluster{maximal_distance: 50.0};
     let clusters = pc.cluster(&ov);
@@ -41,5 +45,17 @@ fn main() {
         Some(p) => println!("{}", p),
         None => println!("Aïe Caramba")
     }
+
+    let mut rb = sample_filter::MaskSampleFilter::new(red, mask);
+
+    let filtered = rb.filter(&ov);
+
+    for f in &filtered.unwrap(){
+        match f{
+            Some(p) => println!("{}", p),
+            None => continue
+        }
+    }
+
 
 }
