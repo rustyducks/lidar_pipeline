@@ -9,7 +9,7 @@ pub use crate::clustering::clusterer;
 pub use crate::clustering::clusterer::Clusterer;
 pub use crate::clustering::proximity_clusterer;
 pub use crate::obstacles::mask_from_file;
-pub use crate::redis_handler::RobotPoseGetter;
+pub use crate::redis_handler::{RobotPoseGetter, DistancesToEllipseSender};
 pub use crate::filtering::sample_filter;
 pub use crate::filtering::sample_filter::SampleFilter;
 pub use lidar_rd::Sample;
@@ -51,12 +51,10 @@ fn main() {
 
     let filtered = rb.filter(&ov);
 
-    for f in &filtered.unwrap(){
-        match f{
-            Some(p) => println!("{}", p),
-            None => continue
-        }
-    }
+    let (min, max) = distance_to_ellipse::min_max_distance_to_ellipse(1.57, 0.5, 150., 50., &filtered);
+    println!("{};{}", min, max);
 
+    let mut redd = redis_handler::RedisHandler::new("redis://127.0.0.1/").unwrap();
+    redd.send_distances(min, max, "far");
 
 }

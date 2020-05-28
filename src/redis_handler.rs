@@ -7,6 +7,10 @@ pub trait RobotPoseGetter{
     fn get_pose(&mut self) -> Option<Pose>;
 }
 
+pub trait DistancesToEllipseSender{
+    fn send_distances(&mut self, min_distance: f64, max_distance: f64, ellipse_name: &str);
+}
+
 pub struct RedisHandler{
     client: redis::Client,
     con: redis::Connection
@@ -38,6 +42,15 @@ impl RobotPoseGetter for RedisHandler{
         Some(Pose{
             x, y, theta
         })
+    }
+}
+
+impl DistancesToEllipseSender for RedisHandler{
+    fn send_distances(&mut self, min_distance: f64, max_distance: f64, ellipse_name: &str) {
+        let _: () = redis::pipe().atomic()
+        .set(format!("distance_to_ellipse/{}/min", ellipse_name), min_distance).ignore()
+        .set(format!("distance_to_ellipse/{}/max", ellipse_name), max_distance).ignore()
+        .query(&mut self.con).unwrap();
     }
 }
 
