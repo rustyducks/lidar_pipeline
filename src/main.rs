@@ -3,6 +3,7 @@ mod geometrical_tools;
 mod obstacles;
 mod redis_handler;
 mod filtering;
+mod distance_to_ellipse;
 
 pub use crate::clustering::clusterer;
 pub use crate::clustering::clusterer::Clusterer;

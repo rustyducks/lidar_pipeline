@@ -76,6 +76,18 @@ pub fn wrap_angle(angle: f64) -> f64{
     return a;
 }
 
+pub fn angle_between(begin: f64, end: f64, angle: f64) -> bool{
+    let mut end = end - begin;
+    while end < 0.0 {
+        end += 2. * PI;
+    }
+    let mut angle = angle - begin;
+    while angle < 0.0 {
+        angle += 2. * PI;
+    }
+    angle < end
+}
+
 #[cfg(test)]
 mod test{
     use super::*;
