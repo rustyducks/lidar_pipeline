@@ -3,7 +3,7 @@ use std::vec::Vec;
 use crate::clustering::clusterer::Cluster;
 
 pub trait ClusterFilter{
-    fn filter(self, clusters: &Option<Vec<Cluster>>) -> Option<Vec<Cluster>>;
+    fn filter(&self, clusters: &Option<Vec<Cluster>>) -> Option<Vec<Cluster>>;
 }
 
 pub struct BeaconFilter{
@@ -12,26 +12,29 @@ pub struct BeaconFilter{
     pub min_intensity: u16,
     pub max_sq_distance_from_beacon: f64
 }
-/*
-impl ClusterFilter for ClusterFilter{
-    fn filter(clusters: Option<Vec<Cluster>>) -> Option<Vec<Cluster>>{
+
+impl ClusterFilter for BeaconFilter{
+    fn filter(&self, clusters: &Option<Vec<Cluster>>) -> Option<Vec<Cluster>>{
         if (clusters.is_none()){
             return None;
         }
-        let clusters = clusters.unwrap();
+        let clusters = match clusters{
+            Some(c) => c,
+            None => return None
+        };
         let mut filtered = Vec::new();
-        for cluster in clusters.iter(){
-            if (cluster.points.len() < cluster_min_size){
+        for cluster in clusters{
+            if (cluster.points.len() < self.cluster_min_size){
                 continue;
             }
-            if (cluster.barycenter.distance > max_distance_from_robot){
+            if (cluster.barycenter.distance > self.max_distance_from_robot){
                 continue;
             }
-            if (cluster.max_intensity < min_intensity){
+            if (cluster.max_intensity < self.min_intensity){
                 continue;
             }
-            
+            filtered.push(cluster.clone());  // Copy
         }
+        Some(filtered)
     }
 }
-*/

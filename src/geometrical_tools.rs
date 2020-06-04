@@ -17,7 +17,7 @@ impl PolarPoint{
 
 impl std::fmt::Display for PolarPoint {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "({}, {}°)", self.distance, self.angle * 180. / PI)
+        write!(f, "({:2}, {:1}°)", self.distance, self.angle * 180. / PI)
     }
 }
 
