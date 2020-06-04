@@ -6,6 +6,10 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+default = []
+ivy = ["ivyrust"]
+
 [[bin]]
 name = "lidar_pipeline"
 path = "src/main.rs"
@@ -13,7 +17,7 @@ path = "src/main.rs"
 [dependencies]
 lidar_rd = {git = "https://github.com/rustyducks/lidar_rd"}
 yaml-rust = "0.4.3"
-ivyrust = {git = "https://github.com/paparazzi/ivy-rust.git"}
+ivyrust = {git = "https://github.com/paparazzi/ivy-rust.git", optional = true}
 
 [dependencies.redis]
 version = "*"

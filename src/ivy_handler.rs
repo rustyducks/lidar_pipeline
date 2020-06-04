@@ -1,3 +1,4 @@
+#[cfg(feature = "ivy")]
 extern crate ivyrust;
 
 use ivyrust::{ivy_init, ivy_start, ivy_send_msg};

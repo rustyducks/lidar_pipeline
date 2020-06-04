@@ -15,7 +15,7 @@ pub struct BeaconFilter{
 
 impl ClusterFilter for BeaconFilter{
     fn filter(&self, clusters: &Option<Vec<Cluster>>) -> Option<Vec<Cluster>>{
-        if (clusters.is_none()){
+        if clusters.is_none(){
             return None;
         }
         let clusters = match clusters{
@@ -24,13 +24,13 @@ impl ClusterFilter for BeaconFilter{
         };
         let mut filtered = Vec::new();
         for cluster in clusters{
-            if (cluster.points.len() < self.cluster_min_size){
+            if cluster.points.len() < self.cluster_min_size{
                 continue;
             }
-            if (cluster.barycenter.distance > self.max_distance_from_robot){
+            if cluster.barycenter.distance > self.max_distance_from_robot{
                 continue;
             }
-            if (cluster.max_intensity < self.min_intensity){
+            if cluster.max_intensity < self.min_intensity{
                 continue;
             }
             filtered.push(cluster.clone());  // Copy

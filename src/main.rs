@@ -4,7 +4,10 @@ mod obstacles;
 mod redis_handler;
 mod filtering;
 mod distance_to_ellipse;
+
+#[cfg(feature = "ivy")]
 mod ivy_handler;
+
 
 pub use crate::clustering::clusterer;
 pub use crate::clustering::clusterer::Clusterer;
@@ -27,7 +30,8 @@ fn main() {
     // let ov = Some(v);
     let pc = proximity_clusterer::ProximityCluster{maximal_angle: 0.2, maximal_distance: 70.};
     let cf = filtering::cluster_filter::BeaconFilter{max_distance_from_robot: 3500., cluster_min_size: 1, min_intensity: 1000, max_sq_distance_from_beacon: 0.};
-    let ivy = ivy_handler::IvyHandler::new("127.0.0.1:2010".to_string());
+    //let ivy = ivy_handler::IvyHandler::new("127.0.0.1:2010".to_string());
+    
     let mut l = XV11::new("/dev/ttyUSB0");
     l.start();
     let mut i = 0;
@@ -37,9 +41,9 @@ fn main() {
         let filtered = cf.filter(&clusters);
         i += 1;
         if i > 10{
-            ivy.send_cluster(&filtered);
+        //    ivy.send_cluster(&filtered);
             i = 0
-        }
+        }  
         
         println!("\n\n")
     }
