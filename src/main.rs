@@ -4,6 +4,7 @@ mod obstacles;
 mod redis_handler;
 mod filtering;
 mod distance_to_ellipse;
+mod ivy_handler;
 
 pub use crate::clustering::clusterer;
 pub use crate::clustering::clusterer::Clusterer;
@@ -12,6 +13,7 @@ pub use crate::obstacles::mask_from_file;
 pub use crate::redis_handler::{RobotPoseGetter, DistancesToEllipseSender};
 pub use crate::filtering::sample_filter;
 pub use crate::filtering::sample_filter::SampleFilter;
+pub use crate::filtering::cluster_filter::ClusterFilter;
 pub use lidar_rd::{Sample, Lidar, XV11};
 
 fn main() {
@@ -23,21 +25,23 @@ fn main() {
     // let s6: Option<Sample> = Some(Sample{angle: 1.57, distance: 100, quality: 255});
     // let v = vec!(s1, s2, s3, s4, s5, s6);
     // let ov = Some(v);
+    let pc = proximity_clusterer::ProximityCluster{maximal_angle: 0.2, maximal_distance: 70.};
+    let cf = filtering::cluster_filter::BeaconFilter{max_distance_from_robot: 3500., cluster_min_size: 1, min_intensity: 1000, max_sq_distance_from_beacon: 0.};
+    let ivy = ivy_handler::IvyHandler::new("127.0.0.1:2010".to_string());
     let mut l = XV11::new("/dev/ttyUSB0");
     l.start();
+    let mut i = 0;
     for scan in l.iter() {
         let ov = Some(scan);
-        let (min_far, max_far) = distance_to_ellipse::min_max_distance_to_ellipse(0.0, 1.3, 550., 200., &ov);        
-        if min_far < 0.0{
-            let (min_close, max_close) = distance_to_ellipse::min_max_distance_to_ellipse(0.0, 1.3, 250., 200., &ov);
-            if min_close < 0.0{
-                println!("STOP !");
-            }else{
-                println!("{:0}%", min_close / (550. - 250.) * 100.)
-            }
-        }else{
-            println!("FULL SPEED !");
+        let clusters = pc.cluster(&ov);
+        let filtered = cf.filter(&clusters);
+        i += 1;
+        if i > 10{
+            ivy.send_cluster(&filtered);
+            i = 0
         }
+        
+        println!("\n\n")
     }
     // let pc = proximity_clusterer::ProximityCluster{maximal_distance: 50.0};
     // let clusters = pc.cluster(&ov);
