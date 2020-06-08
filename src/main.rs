@@ -29,12 +29,12 @@ fn main() {
     // let v = vec!(s1, s2, s3, s4, s5, s6);
     // let ov = Some(v);
     let pc = proximity_clusterer::ProximityCluster{maximal_angle: 0.2, maximal_distance: 70.};
-    let mut red = redis_handler::FakeRedisHandler::new(geometrical_tools::Pose{x: 200.0, y: 200.0, theta: 1.57}).unwrap();
+    let mut red = redis_handler::FakeRedisHandler::new(geometrical_tools::Pose{x: 0.0, y: 450., theta: 0.0}).unwrap();
     let mut cf = filtering::cluster_filter::BeaconFilter{
-        max_distance_from_robot: 3500., cluster_min_size: 1, min_intensity: 1000, max_sq_distance_from_beacon: 0.,
+        max_distance_from_robot: 3500., cluster_min_size: 1, min_intensity: 1000, max_sq_distance_from_beacon: 100f64.powi(2),
         robot_pose_getter: red, beacons_poses: [geometrical_tools::CartesianPoint::new(0., 0.), 
-                                                geometrical_tools::CartesianPoint::new(0., 750.), 
-                                                geometrical_tools::CartesianPoint::new(1500., 375.)]
+                                                geometrical_tools::CartesianPoint::new(0., 950.), 
+                                                geometrical_tools::CartesianPoint::new(1360., 450.)]
         };
     //let ivy = ivy_handler::IvyHandler::new("127.0.0.1:2010".to_string());
     
@@ -51,7 +51,9 @@ fn main() {
             i = 0
         }  
         
-        println!("\n\n")
+        for cl in filtered.unwrap(){
+            print!("{}\n", cl);
+        }
     }
     // let pc = proximity_clusterer::ProximityCluster{maximal_distance: 50.0};
     // let clusters = pc.cluster(&ov);
