@@ -4,6 +4,7 @@ mod obstacles;
 mod redis_handler;
 mod filtering;
 mod distance_to_ellipse;
+mod beacons;
 
 #[cfg(feature = "ivy")]
 mod ivy_handler;
@@ -29,12 +30,13 @@ fn main() {
     // let v = vec!(s1, s2, s3, s4, s5, s6);
     // let ov = Some(v);
     let pc = proximity_clusterer::ProximityCluster{maximal_angle: 0.2, maximal_distance: 70.};
+    let beacons = beacons::Beacons{positions: [geometrical_tools::CartesianPoint::new(0., 0.), 
+        geometrical_tools::CartesianPoint::new(0., 950.), 
+        geometrical_tools::CartesianPoint::new(1360., 450.)], radius: 47.5 };
     let mut red = redis_handler::FakeRedisHandler::new(geometrical_tools::Pose{x: 0.0, y: 450., theta: 0.0}).unwrap();
     let mut cf = filtering::cluster_filter::BeaconFilter{
         max_distance_from_robot: 3500., cluster_min_size: 1, min_intensity: 1000, max_sq_distance_from_beacon: 100f64.powi(2),
-        robot_pose_getter: red, beacons_poses: [geometrical_tools::CartesianPoint::new(0., 0.), 
-                                                geometrical_tools::CartesianPoint::new(0., 950.), 
-                                                geometrical_tools::CartesianPoint::new(1360., 450.)]
+        robot_pose_getter: red, beacons: &beacons
         };
     //let ivy = ivy_handler::IvyHandler::new("127.0.0.1:2010".to_string());
     
