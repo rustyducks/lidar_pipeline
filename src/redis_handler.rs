@@ -11,6 +11,10 @@ pub trait DistancesToEllipseSender{
     fn send_distances(&mut self, min_distance: f64, max_distance: f64, ellipse_name: &str);
 }
 
+pub trait DistancesToBeaconsSender{
+    fn send_distances_to_beacons(&mut self, d1: Option<f64>, d2: Option<f64>, d3: Option<f64>);
+}
+
 pub struct RedisHandler{
     client: redis::Client,
     con: redis::Connection
@@ -51,6 +55,29 @@ impl DistancesToEllipseSender for RedisHandler{
         .set(format!("distance_to_ellipse/{}/min", ellipse_name), min_distance).ignore()
         .set(format!("distance_to_ellipse/{}/max", ellipse_name), max_distance).ignore()
         .query(&mut self.con).unwrap();
+    }
+}
+
+impl DistancesToBeaconsSender for RedisHandler{
+    fn send_distances_to_beacons(&mut self, d1: Option<f64>, d2: Option<f64>, d3: Option<f64>) {
+        // if d1.is_none() && d2.is_none() && d3.is_none(){
+        //     return;
+        // }
+        let mut pipe = redis::pipe();
+        let mut pipeatom = pipe.atomic();
+        pipeatom = match d1 {
+            Some(d) => pipeatom.set("distance_to_beacon/1/distance", d).ignore().set("distance_to_beacon/1/new", true).ignore(),
+            None => pipeatom.set("distance_to_beacon/1/new", false).ignore()
+        };
+        pipeatom = match d2 {
+            Some(d) => pipeatom.set("distance_to_beacon/2/distance", d).ignore().set("distance_to_beacon/2/new", true).ignore(),
+            None => pipeatom.set("distance_to_beacon/2/new", false).ignore()
+        };
+        pipeatom = match d3 {
+            Some(d) => pipeatom.set("distance_to_beacon/3/distance", d).ignore().set("distance_to_beacon/3/new", true).ignore(),
+            None => pipeatom.set("distance_to_beacon/3/new", false).ignore()
+        };
+        let _ : () = pipeatom.query(&mut self.con).unwrap();
     }
 }
 

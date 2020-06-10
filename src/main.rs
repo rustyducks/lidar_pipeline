@@ -15,7 +15,7 @@ pub use crate::clustering::clusterer;
 pub use crate::clustering::clusterer::Clusterer;
 pub use crate::clustering::proximity_clusterer;
 pub use crate::obstacles::mask_from_file;
-pub use crate::redis_handler::{RobotPoseGetter, DistancesToEllipseSender};
+pub use crate::redis_handler::{RobotPoseGetter, DistancesToEllipseSender, DistancesToBeaconsSender};
 pub use crate::filtering::sample_filter;
 pub use crate::filtering::sample_filter::SampleFilter;
 pub use crate::filtering::cluster_filter::ClusterFilter;
@@ -36,7 +36,7 @@ fn main() {
         geometrical_tools::CartesianPoint::new(1360., 450.)], radius: 47.5 };
     let red = redis_handler::FakeRedisHandler::new(geometrical_tools::Pose{x: 0.0, y: 450., theta: 0.0}).unwrap();
     let red2 = redis_handler::FakeRedisHandler::new(geometrical_tools::Pose{x: 0.0, y: 450., theta: 0.0}).unwrap();
-    
+    let mut redis_handl = redis_handler::RedisHandler::new("redis://127.0.0.1:6379").unwrap();
     let mut cf = filtering::cluster_filter::BeaconFilter{
         max_distance_from_robot: 3500., cluster_min_size: 1, min_intensity: 1000, max_sq_distance_from_beacon: 100f64.powi(2),
         robot_pose_getter: red, beacons: &beacons
@@ -63,7 +63,10 @@ fn main() {
         }
         match distances{
             None => println!("..."),
-            Some(d) => println!("{}, {}, {}", d[0].unwrap_or(0.), d[1].unwrap_or(0.), d[2].unwrap_or(0.))
+            Some(d) => {
+                println!("{}, {}, {}", d[0].unwrap_or(0.), d[1].unwrap_or(0.), d[2].unwrap_or(0.));
+                redis_handl.send_distances_to_beacons(d[0], d[1], d[2]);
+            }
         }
     }
     // let pc = proximity_clusterer::ProximityCluster{maximal_distance: 50.0};
