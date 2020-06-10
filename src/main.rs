@@ -5,6 +5,7 @@ mod redis_handler;
 mod filtering;
 mod distance_to_ellipse;
 mod beacons;
+mod distance_to_beacons;
 
 #[cfg(feature = "ivy")]
 mod ivy_handler;
@@ -33,11 +34,14 @@ fn main() {
     let beacons = beacons::Beacons{positions: [geometrical_tools::CartesianPoint::new(0., 0.), 
         geometrical_tools::CartesianPoint::new(0., 950.), 
         geometrical_tools::CartesianPoint::new(1360., 450.)], radius: 47.5 };
-    let mut red = redis_handler::FakeRedisHandler::new(geometrical_tools::Pose{x: 0.0, y: 450., theta: 0.0}).unwrap();
+    let red = redis_handler::FakeRedisHandler::new(geometrical_tools::Pose{x: 0.0, y: 450., theta: 0.0}).unwrap();
+    let red2 = redis_handler::FakeRedisHandler::new(geometrical_tools::Pose{x: 0.0, y: 450., theta: 0.0}).unwrap();
+    
     let mut cf = filtering::cluster_filter::BeaconFilter{
         max_distance_from_robot: 3500., cluster_min_size: 1, min_intensity: 1000, max_sq_distance_from_beacon: 100f64.powi(2),
         robot_pose_getter: red, beacons: &beacons
         };
+    let mut db = distance_to_beacons::DistanceToBeacons{beacons: &beacons, robot_pose_getter: red2};
     //let ivy = ivy_handler::IvyHandler::new("127.0.0.1:2010".to_string());
     
     let mut l = XV11::new("/dev/ttyUSB0");
@@ -47,6 +51,7 @@ fn main() {
         let ov = Some(scan);
         let clusters = pc.cluster(&ov);
         let filtered = cf.filter(&clusters);
+        let distances = db.distance_to_beacons(&filtered);
         i += 1;
         if i > 10{
         //    ivy.send_cluster(&filtered);
@@ -55,6 +60,10 @@ fn main() {
         
         for cl in filtered.unwrap(){
             print!("{}\n", cl);
+        }
+        match distances{
+            None => println!("..."),
+            Some(d) => println!("{}, {}, {}", d[0].unwrap_or(0.), d[1].unwrap_or(0.), d[2].unwrap_or(0.))
         }
     }
     // let pc = proximity_clusterer::ProximityCluster{maximal_distance: 50.0};

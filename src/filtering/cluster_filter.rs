@@ -39,8 +39,8 @@ impl<'a, T: RobotPoseGetter> ClusterFilter for BeaconFilter<'a, T>{
                 continue;
             }
             for beacon in &self.beacons.positions{
-                let x = pose.x + (cluster.closest_point.distance + self.beacons.radius) * (cluster.closest_point.angle + pose.theta).cos();
-                let y = pose.y + (cluster.closest_point.distance + self.beacons.radius) * (cluster.closest_point.angle + pose.theta).sin();
+                let x = pose.x + (cluster.closest_point.distance + self.beacons.radius) * (cluster.closest_point.angle - pose.theta).cos();
+                let y = pose.y + (cluster.closest_point.distance + self.beacons.radius) * (cluster.closest_point.angle - pose.theta).sin();
                 //let x = pose.x + cluster.barycenter.distance * (cluster.barycenter.angle + pose.theta).cos();
                 //let y = pose.y + cluster.barycenter.distance * (cluster.barycenter.angle + pose.theta).sin();
                 let d = (x - beacon.x).powi(2) + (y - beacon.y).powi(2);
