@@ -1,4 +1,5 @@
 use redis;
+use redis::Commands;
 use std::fmt::Write;
 
 
@@ -78,6 +79,7 @@ impl DistancesToBeaconsSender for RedisHandler{
             None => "None".to_string()
         };
         let serialized = format!("{};{};{}", d1_str, d2_str, d3_str);
+        let pipe: () = self.con.publish("beacons/measurements", serialized).unwrap();
     }
 }
 
