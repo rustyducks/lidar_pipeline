@@ -1,6 +1,9 @@
 use redis;
+use redis::Commands;
+use std::fmt::Write;
 
-use crate::geometrical_tools::Pose;
+
+use crate::geometrical_tools::{Pose, PolarPoint};
 
 
 pub trait RobotPoseGetter{
@@ -9,6 +12,10 @@ pub trait RobotPoseGetter{
 
 pub trait DistancesToEllipseSender{
     fn send_distances(&mut self, min_distance: f64, max_distance: f64, ellipse_name: &str);
+}
+
+pub trait DistancesToBeaconsSender{
+    fn send_distances_to_beacons(&mut self, d1: Option<PolarPoint>, d2: Option<PolarPoint>, d3: Option<PolarPoint>);
 }
 
 pub struct RedisHandler{
@@ -51,6 +58,28 @@ impl DistancesToEllipseSender for RedisHandler{
         .set(format!("distance_to_ellipse/{}/min", ellipse_name), min_distance).ignore()
         .set(format!("distance_to_ellipse/{}/max", ellipse_name), max_distance).ignore()
         .query(&mut self.con).unwrap();
+    }
+}
+
+impl DistancesToBeaconsSender for RedisHandler{
+    fn send_distances_to_beacons(&mut self, d1: Option<PolarPoint>, d2: Option<PolarPoint>, d3: Option<PolarPoint>) {
+        // if d1.is_none() && d2.is_none() && d3.is_none(){
+        //     return;
+        // }
+        let d1_str = match d1{
+            Some(d) => format!("{},{}", d.distance, d.angle),
+            None => "None".to_string()
+        };
+        let d2_str = match d2{
+            Some(d) => format!("{},{}", d.distance, d.angle),
+            None => "None".to_string()
+        };
+        let d3_str = match d3{
+            Some(d) => format!("{},{}", d.distance, d.angle),
+            None => "None".to_string()
+        };
+        let serialized = format!("{};{};{}", d1_str, d2_str, d3_str);
+        let pipe: () = self.con.publish("beacons/measurements", serialized).unwrap();
     }
 }
 
