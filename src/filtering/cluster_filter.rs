@@ -45,7 +45,7 @@ impl<'a, T: RobotPoseGetter> ClusterFilter for BeaconFilter<'a, T>{
                 //let y = pose.y + cluster.barycenter.distance * (cluster.barycenter.angle + pose.theta).sin();
                 let d = (x - beacon.x).powi(2) + (y - beacon.y).powi(2);
                 if d <= self.max_sq_distance_from_beacon{
-                    println!("Dist: {}", d);
+                    //println!("Dist: {}", d);
                     filtered.push(cluster.clone());  // Copy
                 }
             }

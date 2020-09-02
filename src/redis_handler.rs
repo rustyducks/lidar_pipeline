@@ -1,6 +1,8 @@
 use redis;
+use std::fmt::Write;
 
-use crate::geometrical_tools::Pose;
+
+use crate::geometrical_tools::{Pose, PolarPoint};
 
 
 pub trait RobotPoseGetter{
@@ -12,7 +14,7 @@ pub trait DistancesToEllipseSender{
 }
 
 pub trait DistancesToBeaconsSender{
-    fn send_distances_to_beacons(&mut self, d1: Option<f64>, d2: Option<f64>, d3: Option<f64>);
+    fn send_distances_to_beacons(&mut self, d1: Option<PolarPoint>, d2: Option<PolarPoint>, d3: Option<PolarPoint>);
 }
 
 pub struct RedisHandler{
@@ -59,25 +61,23 @@ impl DistancesToEllipseSender for RedisHandler{
 }
 
 impl DistancesToBeaconsSender for RedisHandler{
-    fn send_distances_to_beacons(&mut self, d1: Option<f64>, d2: Option<f64>, d3: Option<f64>) {
+    fn send_distances_to_beacons(&mut self, d1: Option<PolarPoint>, d2: Option<PolarPoint>, d3: Option<PolarPoint>) {
         // if d1.is_none() && d2.is_none() && d3.is_none(){
         //     return;
         // }
-        let mut pipe = redis::pipe();
-        let mut pipeatom = pipe.atomic();
-        pipeatom = match d1 {
-            Some(d) => pipeatom.set("distance_to_beacon/1/distance", d).ignore().set("distance_to_beacon/1/new", true).ignore(),
-            None => pipeatom.set("distance_to_beacon/1/new", false).ignore()
+        let d1_str = match d1{
+            Some(d) => format!("{},{}", d.distance, d.angle),
+            None => "None".to_string()
         };
-        pipeatom = match d2 {
-            Some(d) => pipeatom.set("distance_to_beacon/2/distance", d).ignore().set("distance_to_beacon/2/new", true).ignore(),
-            None => pipeatom.set("distance_to_beacon/2/new", false).ignore()
+        let d2_str = match d2{
+            Some(d) => format!("{},{}", d.distance, d.angle),
+            None => "None".to_string()
         };
-        pipeatom = match d3 {
-            Some(d) => pipeatom.set("distance_to_beacon/3/distance", d).ignore().set("distance_to_beacon/3/new", true).ignore(),
-            None => pipeatom.set("distance_to_beacon/3/new", false).ignore()
+        let d3_str = match d3{
+            Some(d) => format!("{},{}", d.distance, d.angle),
+            None => "None".to_string()
         };
-        let _ : () = pipeatom.query(&mut self.con).unwrap();
+        let serialized = format!("{};{};{}", d1_str, d2_str, d3_str);
     }
 }
 

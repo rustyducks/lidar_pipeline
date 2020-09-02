@@ -1,7 +1,7 @@
 use crate::beacons::Beacons;
 use crate::clusterer::Cluster;
 use crate::RobotPoseGetter;
-use crate::geometrical_tools::CartesianPoint;
+use crate::geometrical_tools::{CartesianPoint, PolarPoint};
 
 pub struct DistanceToBeacons<'a, T: RobotPoseGetter>{
     pub beacons: &'a Beacons,
@@ -11,7 +11,7 @@ pub struct DistanceToBeacons<'a, T: RobotPoseGetter>{
 impl<'a, T: RobotPoseGetter> DistanceToBeacons<'a, T>{
     const PERMUTATIONS: [[usize; 3]; 6] = [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]];
 
-    pub fn distance_to_beacons(&mut self, clusters: &Option<Vec<Cluster>>) -> Option<Vec<Option<f64>>>{
+    pub fn distance_to_beacons(&mut self, clusters: &Option<Vec<Cluster>>) -> Option<Vec<Option<PolarPoint>>>{
     let clusters = match clusters {
         Some(c) => c,
         None => return None
@@ -43,7 +43,7 @@ impl<'a, T: RobotPoseGetter> DistanceToBeacons<'a, T>{
     let mut ret = vec![None, None, None];
 
     for (i, c) in clusters.iter().enumerate(){
-        ret[right_permutation.unwrap()[i]] = Some(c.closest_point.distance + self.beacons.radius);
+        ret[right_permutation.unwrap()[i]] = Some(PolarPoint::new(c.closest_point.distance + self.beacons.radius, c.barycenter.angle));
     }
 
     Some(ret)
