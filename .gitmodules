@@ -1,0 +1,3 @@
+[submodule "src/communication/protoduck"]
+	path = src/communication/protoduck
+	url = https://github.com/rustyducks/protoduck.git

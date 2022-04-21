@@ -6,9 +6,6 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[features]
-default = []
-ivy = ["ivyrust"]
 
 [[bin]]
 name = "lidar_pipeline"
@@ -17,7 +14,12 @@ path = "src/main.rs"
 [dependencies]
 lidar_rd = {git = "https://github.com/rustyducks/lidar_rd"}
 yaml-rust = "0.4.3"
-ivyrust = {git = "https://github.com/paparazzi/ivy-rust.git", optional = true}
+serialport = "4.0.1"
+anyhow = "1.0.48"
+signal-hook = "0.3.10"
+clap = "2.33.3"
+protobuf = "2"
 
-[dependencies.redis]
-version = "*"
+[build-dependencies]
+protobuf-codegen-pure = "2.25.2"
+protoc-rust = "2.25.2"
