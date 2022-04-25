@@ -4,12 +4,8 @@ use lidar_rd::Sample;
 pub fn min_max_distance_to_ellipse(
     direction_angle: f64, cone_angle: f64, 
     semi_major: f64, semi_minor: f64, 
-    samples: &Option<Vec<Option<Sample>>>) -> (f64, f64){
-        
-        let samples = match samples {
-            Some(s) => s,
-            None => return (0., 0.)
-        };
+    samples: &Vec<Option<Sample>>) -> (f64, f64){
+
         let eccentricity = (1. - (semi_minor / semi_major).powi(2)).sqrt();
         let start_angle = wrap_angle(direction_angle - cone_angle/2.);
         let end_angle: f64 = wrap_angle(direction_angle + cone_angle/2.);
@@ -47,13 +43,13 @@ mod tests{
         let s8 = Some(Sample{angle: 1.31, distance: 150, quality: 4});  // E1: 98.45362920472493
         let s9 = Some(Sample{angle: -0.9, distance: 340, quality: 10});
         let (min, max ) = min_max_distance_to_ellipse(
-            0.0, 1.57, 150., 50., &Some(vec![s1, s3, s4]));
+            0.0, 1.57, 150., 50., vec![s1, s3, s4]);
         assert!((min - (-50.)).abs() < epsilon);
         assert!((max - 32.62638032873049).abs() < epsilon);
-        let (min, max) = min_max_distance_to_ellipse(1.57, 0.5, 150., 50., &Some(vec![s1, s3, s4, s6, s7, s8]));
+        let (min, max) = min_max_distance_to_ellipse(1.57, 0.5, 150., 50., vec![s1, s3, s4, s6, s7, s8]);
         assert!((min - (-10.)).abs() < epsilon);
         assert!((max - 49.62695735057122).abs() < epsilon);
-        let (min, max) = min_max_distance_to_ellipse(0.0, 1.57, 150., 50., &Some(vec![s2, s5, s9]));
+        let (min, max) = min_max_distance_to_ellipse(0.0, 1.57, 150., 50., vec![s2, s5, s9]);
         assert!((min - (-59.02757959353967)).abs() < epsilon);
         assert!((max - 100.).abs() < epsilon);
     }

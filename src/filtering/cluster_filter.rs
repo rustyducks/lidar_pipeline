@@ -1,15 +1,14 @@
 use crate::geometrical_tools::{PolarPoint, wrap_angle, CartesianPoint};
 use std::vec::Vec;
 use crate::clustering::clusterer::Cluster;
-use crate::redis_handler::RobotPoseGetter;
 use crate::beacons::Beacons;
+use crate::geometrical_tools::Pose;
 
 pub trait ClusterFilter{
-    fn filter(&mut self, clusters: &Option<Vec<Cluster>>) -> Option<Vec<Cluster>>;
+    fn filter(&self, clusters: &Option<Vec<Cluster>>, pose: &Pose) -> Option<Vec<Cluster>>;
 }
 
-pub struct BeaconFilter<'a, T: RobotPoseGetter>{
-    pub robot_pose_getter: T,
+pub struct BeaconFilter<'a>{
     pub beacons: &'a Beacons,
     pub cluster_min_size: usize,
     pub max_distance_from_robot: f64,
@@ -17,8 +16,8 @@ pub struct BeaconFilter<'a, T: RobotPoseGetter>{
     pub max_sq_distance_from_beacon: f64
 }
 
-impl<'a, T: RobotPoseGetter> ClusterFilter for BeaconFilter<'a, T>{
-    fn filter(&mut self, clusters: &Option<Vec<Cluster>>) -> Option<Vec<Cluster>>{
+impl<'a> ClusterFilter for BeaconFilter<'a>{
+    fn filter(&self, clusters: &Option<Vec<Cluster>>, pose: &Pose) -> Option<Vec<Cluster>>{
         if clusters.is_none(){
             return None;
         }
@@ -26,7 +25,6 @@ impl<'a, T: RobotPoseGetter> ClusterFilter for BeaconFilter<'a, T>{
             Some(c) => c,
             None => return None
         };
-        let pose = self.robot_pose_getter.get_pose().unwrap();
         let mut filtered = Vec::new();
         for cluster in clusters{
             if cluster.points.len() < self.cluster_min_size{
