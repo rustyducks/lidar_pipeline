@@ -45,7 +45,7 @@ fn main() {
         )
     });
     let mut robot_pose: Option<Pose>;
-    let mut l = LD06::new("/dev/ttyUSB0");
+    let mut l = LD06::new("/dev/lidar");
     let mask = mask_from_file("obstacles_lidar_mask.yaml");
     let mask_filter = sample_filter::MaskSampleFilter::new(mask);
     let mut pose: Option<Pose> = None;
@@ -71,7 +71,7 @@ fn main() {
             if let Some(scan) = l.get_scan() {
                 if let Some(filtered) = mask_filter.filter(&scan, pose.as_ref().unwrap()) {
                     let distance = distance_to_ellipse::min_max_distance_to_ellipse(
-                        0., 1.57, 150., 50., &filtered,
+                        0., 2.5, 300., 200., &filtered,
                     );
                     let mut msg = messages::Message::new();
                     let mut player_pos = messages::PlayerPos::new();
