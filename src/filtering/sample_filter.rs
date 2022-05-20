@@ -12,11 +12,15 @@ pub trait SampleFilter {
 
 pub struct MaskSampleFilter {
     mask: Mask,
+    min_distance_to_robot: u16,
 }
 
 impl MaskSampleFilter {
-    pub fn new(mask: Mask) -> MaskSampleFilter {
-        MaskSampleFilter { mask }
+    pub fn new(mask: Mask, min_distance_to_robot: u16) -> MaskSampleFilter {
+        MaskSampleFilter {
+            mask,
+            min_distance_to_robot,
+        }
     }
 }
 
@@ -28,6 +32,9 @@ impl SampleFilter for MaskSampleFilter {
                 None => continue,
                 Some(s) => s,
             };
+            if s.distance < self.min_distance_to_robot {
+                continue;
+            }
             let s_in_table = PolarPoint::new(s.distance as f64, s.angle)
                 .to_cartesian()
                 .from_pose(pose);
