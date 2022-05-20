@@ -48,7 +48,7 @@ fn main() {
     let mut robot_pose: Option<Pose>;
     let mut l = LD06::new("/dev/lidar");
     let mask = mask_from_file("obstacles_lidar_mask.yaml");
-    let mask_filter = sample_filter::MaskSampleFilter::new(mask, 8);
+    let mask_filter = sample_filter::MaskSampleFilter::new(mask, 80);
     let clusterer = clustering::proximity_clusterer::ProximityCluster {
         maximal_distance: 25.0,
         maximal_angle: 0.1,
