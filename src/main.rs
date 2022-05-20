@@ -84,7 +84,7 @@ fn main() {
                     .map(|s| {
                         s.and_then(|s| {
                             Some(Sample {
-                                angle: s.angle / 180. * 3.14159265,
+                                angle: -s.angle / 180. * 3.14159265,
                                 distance: s.distance,
                                 quality: s.quality,
                             })
