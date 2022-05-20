@@ -73,7 +73,13 @@ fn main() {
         }
         if pose.is_some() {
             if let Some(scan) = l.get_scan() {
-                if let Some(filtered) = mask_filter.filter(&scan, pose.as_ref().unwrap()) {
+                let scan_rad = scan.iter()
+                    .map(|s| s
+                        .and_then(|s| Some(Sample{
+                                                    angle: s.angle / 180. * 3.14159265, 
+                                                    distance: s.distance, 
+                                                    quality:s.quality}))).collect();
+                if let Some(filtered) = mask_filter.filter(&scan_rad, pose.as_ref().unwrap()) {
                     let clusters = clusterer.cluster(&filtered);
                     let mut i = 0;
                     let mut msg = messages::Message::new();
@@ -101,6 +107,7 @@ fn main() {
                         None => {}
                     };
                     msg.set_player_poses(player_poses);
+                    msg.set_msg_type(messages::Message_MsgType::STATUS);
                     let _ = udp_outgoing_producer_channel
                         .send(LinkMessage::from_bytes(&msg.write_to_bytes().unwrap()));
                 }
