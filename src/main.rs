@@ -22,6 +22,7 @@ pub use crate::filtering::sample_filter;
 use crate::filtering::sample_filter::SampleFilter;
 use crate::geometrical_tools::Pose;
 use filtering::cluster_filter::{self, ClusterFilter};
+use geometrical_tools::wrap_angle;
 pub use lidar_rd::{Lidar, Sample, LD06};
 use protobuf::Message;
 use std::net::UdpSocket;
@@ -84,7 +85,7 @@ fn main() {
                     .map(|s| {
                         s.and_then(|s| {
                             Some(Sample {
-                                angle: -s.angle / 180. * 3.14159265,
+                                angle: wrap_angle(-s.angle / 180. * 3.14159265),
                                 distance: s.distance,
                                 quality: s.quality,
                             })
