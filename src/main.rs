@@ -21,6 +21,7 @@ pub use crate::communication::udp_link;
 pub use crate::filtering::sample_filter;
 use crate::filtering::sample_filter::SampleFilter;
 use crate::geometrical_tools::Pose;
+use filtering::cluster_filter::{self, ClusterFilter};
 pub use lidar_rd::{Lidar, Sample, LD06};
 use protobuf::Message;
 use std::net::UdpSocket;
@@ -49,8 +50,13 @@ fn main() {
     let mask = mask_from_file("obstacles_lidar_mask.yaml");
     let mask_filter = sample_filter::MaskSampleFilter::new(mask);
     let clusterer = clustering::proximity_clusterer::ProximityCluster {
-        maximal_distance: 50.0,
+        maximal_distance: 25.0,
         maximal_angle: 0.1,
+    };
+    let qualityClusterFilter = cluster_filter::QualityFilter {
+        cluster_min_size: 5,
+        max_distance_from_robot: 2500.,
+        min_intensity: 200,
     };
     let mut pose: Option<Pose> = None;
     l.start();
@@ -73,44 +79,49 @@ fn main() {
         }
         if pose.is_some() {
             if let Some(scan) = l.get_scan() {
-                let scan_rad = scan.iter()
-                    .map(|s| s
-                        .and_then(|s| Some(Sample{
-                                                    angle: s.angle / 180. * 3.14159265, 
-                                                    distance: s.distance, 
-                                                    quality:s.quality}))).collect();
+                let scan_rad = scan
+                    .iter()
+                    .map(|s| {
+                        s.and_then(|s| {
+                            Some(Sample {
+                                angle: s.angle / 180. * 3.14159265,
+                                distance: s.distance,
+                                quality: s.quality,
+                            })
+                        })
+                    })
+                    .collect();
                 if let Some(filtered) = mask_filter.filter(&scan_rad, pose.as_ref().unwrap()) {
                     let clusters = clusterer.cluster(&filtered);
-                    let mut i = 0;
                     let mut msg = messages::Message::new();
                     let mut player_poses = messages::PlayerPoses::new();
-                    match clusters {
-                        Some(c) => {
-                            for cluster in c {
-                                let mut player_pos = messages::PlayerPos::new();
-                                let mut player_pos_pos = messages::Pos::new();
-                                let pos = pose.as_ref().unwrap();
-                                player_pos_pos.x = (pos.x
-                                    + cluster.barycenter.distance as f64
-                                        * (cluster.barycenter.angle + pos.theta).cos())
-                                    as f32;
-                                player_pos_pos.y = (pos.y
-                                    + cluster.barycenter.distance as f64
-                                        * (cluster.barycenter.angle + pos.theta).sin())
-                                    as f32;
-                                player_pos.set_aruco_id(i);
-                                player_pos.set_pos(player_pos_pos);
-                                player_poses.player_poses.push(player_pos);
-                                i = i + 1;
-                            }
+                    if let Some(filteredcluster) =
+                        qualityClusterFilter.filter(&clusters, pose.as_ref().unwrap())
+                    {
+                        let mut i = 0;
+                        for cluster in filteredcluster {
+                            let mut player_pos = messages::PlayerPos::new();
+                            let mut player_pos_pos = messages::Pos::new();
+                            let pos = pose.as_ref().unwrap();
+                            player_pos_pos.x = (pos.x
+                                + cluster.barycenter.distance as f64
+                                    * (cluster.barycenter.angle + pos.theta).cos())
+                                as f32;
+                            player_pos_pos.y = (pos.y
+                                + cluster.barycenter.distance as f64
+                                    * (cluster.barycenter.angle + pos.theta).sin())
+                                as f32;
+                            player_pos.set_aruco_id(i);
+                            player_pos.set_pos(player_pos_pos);
+                            player_poses.player_poses.push(player_pos);
+                            i = i + 1;
                         }
-                        None => {}
-                    };
+                    }
                     msg.set_player_poses(player_poses);
                     msg.set_msg_type(messages::Message_MsgType::STATUS);
                     let _ = udp_outgoing_producer_channel
                         .send(LinkMessage::from_bytes(&msg.write_to_bytes().unwrap()));
-                }
+                };
             }
         }
     }
