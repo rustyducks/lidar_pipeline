@@ -1,17 +1,24 @@
 use std::f64::consts::PI;
 
 #[derive(Debug, Copy, Clone)]
-pub struct PolarPoint{
+pub struct PolarPoint {
     pub angle: f64,
-    pub distance: f64
+    pub distance: f64,
 }
 
-impl PolarPoint{
-    pub fn new(distance: f64, angle: f64) -> PolarPoint{
-        PolarPoint{
+impl PolarPoint {
+    pub fn new(distance: f64, angle: f64) -> PolarPoint {
+        PolarPoint {
             distance,
-            angle: wrap_angle(angle)
+            angle: wrap_angle(angle),
         }
+    }
+
+    pub fn to_cartesian(&self) -> CartesianPoint {
+        CartesianPoint::new(
+            self.distance * self.angle.cos(),
+            self.distance * self.angle.sin(),
+        )
     }
 }
 
@@ -21,17 +28,23 @@ impl std::fmt::Display for PolarPoint {
     }
 }
 
-pub struct CartesianPoint{
+pub struct CartesianPoint {
     pub x: f64,
-    pub y: f64
+    pub y: f64,
 }
 
-impl CartesianPoint{
-    pub fn new(x: f64, y: f64) -> CartesianPoint{
-        CartesianPoint{
-            x,
-            y
-        }
+impl CartesianPoint {
+    pub fn new(x: f64, y: f64) -> CartesianPoint {
+        CartesianPoint { x, y }
+    }
+
+    pub fn from_pose(&self, pose: &Pose) -> CartesianPoint {
+        let c = pose.theta.cos();
+        let s = pose.theta.sin();
+        CartesianPoint::new(
+            pose.x + self.x * c - self.y * s,
+            pose.y + self.x * s + self.y * c,
+        )
     }
 }
 
@@ -41,18 +54,18 @@ impl std::fmt::Display for CartesianPoint {
     }
 }
 
-pub struct Pose{
+pub struct Pose {
     pub x: f64,
     pub y: f64,
-    pub theta: f64
+    pub theta: f64,
 }
 
-impl Pose{
-    pub fn new(x: f64, y: f64, theta: f64) -> Pose{
-        Pose{
+impl Pose {
+    pub fn new(x: f64, y: f64, theta: f64) -> Pose {
+        Pose {
             x: x,
             y: y,
-            theta: wrap_angle(theta)
+            theta: wrap_angle(theta),
         }
     }
 }
@@ -63,7 +76,7 @@ impl std::fmt::Display for Pose {
     }
 }
 
-pub fn wrap_angle(angle: f64) -> f64{
+pub fn wrap_angle(angle: f64) -> f64 {
     let mut a = angle;
     while a < -PI {
         a += 2.0 * PI;
@@ -76,7 +89,7 @@ pub fn wrap_angle(angle: f64) -> f64{
     return a;
 }
 
-pub fn angle_between(begin: f64, end: f64, angle: f64) -> bool{
+pub fn angle_between(begin: f64, end: f64, angle: f64) -> bool {
     let mut end = end - begin;
     while end < 0.0 {
         end += 2. * PI;
@@ -89,11 +102,11 @@ pub fn angle_between(begin: f64, end: f64, angle: f64) -> bool{
 }
 
 #[cfg(test)]
-mod test{
+mod test {
     use super::*;
 
     #[test]
-    fn test_new_polar_point(){
+    fn test_new_polar_point() {
         let pp = PolarPoint::new(235.5, 2.45);
         let pp2 = PolarPoint::new(365.35, 6.0 * PI);
         assert_eq!(pp.distance, 235.5);
@@ -104,17 +117,16 @@ mod test{
     }
 
     #[test]
-    fn test_new_cartesian_point(){
+    fn test_new_cartesian_point() {
         let cp = CartesianPoint::new(34.63, 23.76);
         assert_eq!(cp.x, 34.63);
         assert_eq!(cp.y, 23.76);
     }
 
     #[test]
-    fn test_wrap_angle(){
+    fn test_wrap_angle() {
         assert_eq!(wrap_angle(1.23), 1.23);
         assert_eq!(wrap_angle(6.0 * PI), 0.0);
         assert!(wrap_angle(-45.0 * PI) - (-PI) < 10.0f64.powi(-8));
     }
-
 }

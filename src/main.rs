@@ -103,14 +103,9 @@ fn main() {
                             let mut player_pos = messages::PlayerPos::new();
                             let mut player_pos_pos = messages::Pos::new();
                             let pos = pose.as_ref().unwrap();
-                            player_pos_pos.x = (pos.x
-                                + cluster.barycenter.distance as f64
-                                    * (cluster.barycenter.angle + pos.theta).cos())
-                                as f32;
-                            player_pos_pos.y = (pos.y
-                                + cluster.barycenter.distance as f64
-                                    * (cluster.barycenter.angle + pos.theta).sin())
-                                as f32;
+                            let pos_in_table = cluster.barycenter.to_cartesian().from_pose(pos);
+                            player_pos_pos.x = pos_in_table.x as f32;
+                            player_pos_pos.y = pos_in_table.y as f32;
                             player_pos.set_aruco_id(i);
                             player_pos.set_pos(player_pos_pos);
                             player_poses.player_poses.push(player_pos);
