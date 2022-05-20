@@ -7,9 +7,9 @@ mod obstacles;
 //mod distance_to_beacons;
 mod communication;
 
-//pub use crate::clustering::clusterer;
-//pub use crate::clustering::clusterer::Clusterer;
-//pub use crate::clustering::proximity_clusterer;
+pub use crate::clustering::clusterer;
+pub use crate::clustering::clusterer::Clusterer;
+pub use crate::clustering::proximity_clusterer;
 pub use crate::obstacles::mask_from_file;
 //pub use crate::filtering::sample_filter;
 //pub use crate::filtering::sample_filter::SampleFilter;
@@ -48,6 +48,10 @@ fn main() {
     let mut l = LD06::new("/dev/lidar");
     let mask = mask_from_file("obstacles_lidar_mask.yaml");
     let mask_filter = sample_filter::MaskSampleFilter::new(mask);
+    let clusterer = clustering::proximity_clusterer::ProximityCluster {
+        maximal_distance: 50.0,
+        maximal_angle: 0.1,
+    };
     let mut pose: Option<Pose> = None;
     l.start();
     loop {
@@ -70,19 +74,35 @@ fn main() {
         if pose.is_some() {
             if let Some(scan) = l.get_scan() {
                 if let Some(filtered) = mask_filter.filter(&scan, pose.as_ref().unwrap()) {
-                    let distance = distance_to_ellipse::min_max_distance_to_ellipse(
-                        0., 2.5, 300., 200., &filtered,
-                    );
+                    let clusters = clusterer.cluster(&filtered);
+                    let mut i = 0;
                     let mut msg = messages::Message::new();
-                    let mut player_pos = messages::PlayerPos::new();
-                    let mut player_pos_pos = messages::Pos::new();
-                    player_pos_pos.set_x(distance.0 as f32);
-                    player_pos_pos.set_y(distance.1 as f32);
-                    player_pos.set_aruco_id(2000);
-                    player_pos.set_pos(player_pos_pos);
-                    msg.set_player_pos(player_pos);
-                    let res = udp_outgoing_producer_channel
-                        .send(LinkMessage::from_bytes(&msg.write_to_bytes().unwrap()[..]));
+                    let mut player_poses = messages::PlayerPoses::new();
+                    match clusters {
+                        Some(c) => {
+                            for cluster in c {
+                                let mut player_pos = messages::PlayerPos::new();
+                                let mut player_pos_pos = messages::Pos::new();
+                                let pos = pose.as_ref().unwrap();
+                                player_pos_pos.x = (pos.x
+                                    + cluster.barycenter.distance as f64
+                                        * (cluster.barycenter.angle + pos.theta).cos())
+                                    as f32;
+                                player_pos_pos.y = (pos.y
+                                    + cluster.barycenter.distance as f64
+                                        * (cluster.barycenter.angle + pos.theta).sin())
+                                    as f32;
+                                player_pos.set_aruco_id(i);
+                                player_pos.set_pos(player_pos_pos);
+                                player_poses.player_poses.push(player_pos);
+                                i = i + 1;
+                            }
+                        }
+                        None => {}
+                    };
+                    msg.set_player_poses(player_poses);
+                    let _ = udp_outgoing_producer_channel
+                        .send(LinkMessage::from_bytes(&msg.write_to_bytes().unwrap()));
                 }
             }
         }
