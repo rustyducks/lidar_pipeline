@@ -4,22 +4,3 @@ mask:
     y_start: 100.
     x_stop: 2900.
     y_stop: 1900.
-  static_obstacles: # Inside those rectangles, any lidar point will be discarded
-    - rect:
-        x1: 100.
-        y1: 130.
-        x2: 200.
-        y2: 150.
-    - rect:
-        x1: 1200.
-        y1: 0.
-        x2: 1350.
-        y2: 1235.
-    - circle:
-        center:
-          x: 1000.
-          y: 950.
-        radius: 150.
-
-
-
