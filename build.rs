@@ -1,9 +1,7 @@
-
-use std::env;
-use std::fs;
-use std::path::Path;
 use protobuf_codegen_pure::Customize;
 use protoc_rust;
+use std::fs;
+use std::path::Path;
 
 fn main() {
     let out_dir = "./src/communication";
@@ -15,7 +13,6 @@ fn main() {
     }
 
     fs::create_dir(&generated_with_native_dir).unwrap();
-
 
     println!("{}", &generated_with_native_dir);
     protoc_rust::Codegen::new()
