@@ -16,7 +16,6 @@ pub use crate::obstacles::mask_from_file;
 //pub use crate::filtering::cluster_filter::ClusterFilter;
 pub use crate::communication::link::LinkMessage;
 use crate::communication::protoduck_generated::messages;
-use crate::communication::transport::Transport;
 pub use crate::communication::udp_link;
 pub use crate::filtering::sample_filter;
 use crate::filtering::sample_filter::SampleFilter;
@@ -25,10 +24,13 @@ use filtering::cluster_filter::{self, ClusterFilter};
 use geometrical_tools::wrap_angle;
 pub use lidar_rd::{Lidar, Sample, LD06};
 use protobuf::Message;
+use std::env;
 use std::net::UdpSocket;
 use std::{sync::mpsc, thread, time::Duration};
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    let obstacle_filename = &args[0];
     let (udp_incoming_producer_channel, udp_incoming_consumer_channel) =
         mpsc::channel::<LinkMessage>();
     let (udp_outgoing_producer_channel, udp_outgoing_consumer_channel) =
@@ -39,28 +41,27 @@ fn main() {
         .set_read_timeout(Some(Duration::from_millis(1)))
         .expect("UDP set timeout failed");
 
-    let th_udp = thread::spawn(move || {
+    let _th_udp = thread::spawn(move || {
         udp_link::run(
             socket,
             udp_outgoing_consumer_channel,
             udp_incoming_producer_channel,
         )
     });
-    let mut robot_pose: Option<Pose>;
     let mut l = LD06::new("/dev/lidar");
-    let mask = mask_from_file("obstacles_lidar_mask.yaml");
+    let mask = mask_from_file(obstacle_filename);
     let mask_filter = sample_filter::MaskSampleFilter::new(mask, 80);
     let clusterer = clustering::proximity_clusterer::ProximityCluster {
         maximal_distance: 25.0,
         maximal_angle: 0.1,
     };
-    let qualityClusterFilter = cluster_filter::QualityFilter {
+    let quality_cluster_filter = cluster_filter::QualityFilter {
         cluster_min_size: 5,
         max_distance_from_robot: 2500.,
         min_intensity: 200,
     };
     let mut pose: Option<Pose> = None;
-    l.start();
+    let _ = l.start();
     loop {
         match udp_incoming_consumer_channel.try_recv() {
             Ok(msg) => {
@@ -97,7 +98,7 @@ fn main() {
                     let mut msg = messages::Message::new();
                     let mut player_poses = messages::PlayerPoses::new();
                     if let Some(filteredcluster) =
-                        qualityClusterFilter.filter(&clusters, pose.as_ref().unwrap())
+                        quality_cluster_filter.filter(&clusters, pose.as_ref().unwrap())
                     {
                         let mut i = 0;
                         for cluster in filteredcluster {
