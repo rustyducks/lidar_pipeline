@@ -30,7 +30,7 @@ use std::{sync::mpsc, thread, time::Duration};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let obstacle_filename = &args[0];
+    let obstacle_filename = &args[1];
     let (udp_incoming_producer_channel, udp_incoming_consumer_channel) =
         mpsc::channel::<LinkMessage>();
     let (udp_outgoing_producer_channel, udp_outgoing_consumer_channel) =
@@ -49,6 +49,7 @@ fn main() {
         )
     });
     let mut l = LD06::new("/dev/lidar");
+    println!("{}", obstacle_filename);
     let mask = mask_from_file(obstacle_filename);
     let mask_filter = sample_filter::MaskSampleFilter::new(mask, 80);
     let clusterer = clustering::proximity_clusterer::ProximityCluster {
