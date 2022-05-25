@@ -51,7 +51,7 @@ fn main() {
     let mut l = LD06::new("/dev/lidar");
     println!("{}", obstacle_filename);
     let mask = mask_from_file(obstacle_filename);
-    let mask_filter = sample_filter::MaskSampleFilter::new(mask, 80);
+    let mask_filter = sample_filter::MaskSampleFilter::new(mask, 150, 150);
     let clusterer = clustering::proximity_clusterer::ProximityCluster {
         maximal_distance: 25.0,
         maximal_angle: 0.1,
